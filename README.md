@@ -13,7 +13,7 @@ This project might give you value if you are:
 - Use zap logger in your golang applications, directly or via a framework
 - Use OpenTelemetry in your system, or plan to use it in the future
 - Looking to simplify your log pipeline by removing log agents from deployments
-- Starting a new project from scratch and want to use new practices and standards
+- Starting a new project from scratch and looking to tailor a solution to your needs
 
 ## Motivation
 
@@ -172,4 +172,6 @@ This project is brought to you with ❤️ by the [odigos](https://odigos.io/) t
 
 We are happy to hear your feedback and answer your questions. Or just say hi and chat about observability.
 
-If you want to try out [odigos](https://odigos.io/) let's talk about it too.
+If you want to try out [odigos](https://odigos.io/), with or without this log bridge, let's talk about it too.
+
+You can find us in [odigos slack](https://join.slack.com/t/odigos/shared_invite/zt-1d7egaz29-Rwv2T8kyzc3mWP8qKobz~A)
