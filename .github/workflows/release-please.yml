@@ -1,0 +1,25 @@
+name: Release Please
+
+on:
+  push:
+    branches:
+      - "main"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Release with release-please
+        uses: google-github-actions/release-please-action@v3
+        with:
+          token: ${{ secrets.RELEASE_BOT_TOKEN }}
+          release-type: go
+          package-name: github.com/keyval-dev/opentelemetry-zap-bridge
