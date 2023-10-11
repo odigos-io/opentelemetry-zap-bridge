@@ -6,15 +6,23 @@ This module convert every log record written to zap logger in golang into OpenTe
 
 This project depends on the experimental [opentelemetry-logs-go](https://github.com/agoda-com/opentelemetry-logs-go) project, and is thus experimental as well. It is recommend to use with caution.
 
+## Target Audience
+
+This project might give you value if you are:
+- Maintain or operate golang applications
+- Use zap logger in your golang applications, directly or via a framework
+- Use OpenTelemetry in your system, or plan to use it in the future
+- Looking to simplify your log pipeline by removing log agents from deployments
+- Starting a new project from scratch and want to use new practices and standards
+
 ## Motivation
 
-Out of the 3 pillars of observability, `logging` is the most mature one. There are many logging libraries and frameworks, and many of them are already used in production. A popular framework for logging in go is [zap logger](https://github.com/uber-go/zap) which this project targets. There are also existing practices and standards 
-for how to write logs pipelines that ship these logs to some destination where they are later processed and indexed to aid in system operation tasks.
+Out of the 3 pillars of observability, `logging` is the most mature one. There are many logging libraries and frameworks, and many of them are already used in production. A popular framework for logging in go is [zap logger](https://github.com/uber-go/zap) which this project targets. There are also existing practices and standards for how to write logs pipelines that ship these logs to some destination where they are later processed and indexed to aid in system operation tasks.
 
-OpenTelemetry is a new standard for observability, and it is still in its infancy. 
+OpenTelemetry is a new and modern standard for observability, and it is still in its infancy. 
 The OpenTelemetry ecosystem offers a rich set of tools to deliver a high quality observability implementation for modern cloud systems, such as:
-- [OpenTelemetry Collector]() - a high performance, vendor agnostic, logs processing pipeline with dozens of processors and exporters.
-- [OTLP protocol]() - a vendor agnostic, high performance, modern logs protocol.
+- [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/) - a high performance, vendor agnostic, logs processing pipeline with dozens of processors and exporters.
+- [OTLP protocol](https://opentelemetry.io/docs/specs/otel/protocol/) - a vendor agnostic, high performance, modern logs protocol.
 - Unified framework - one framework to handle all observability signals in a consistent and unified matter.
 
 and many more.
