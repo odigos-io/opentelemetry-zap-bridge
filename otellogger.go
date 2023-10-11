@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	otelSdkDisabled = "OTEL_SDK_DISABLED"
+	otelSdkDisabled            = "OTEL_SDK_DISABLED"
+	instrumentationLibraryName = "github.com/keyval-dev/opentelemetry-zap-bridge"
 )
 
 type OtelZapCore struct {
@@ -35,8 +36,8 @@ func NewOtelZapCore() zapcore.Core {
 	loggerProvider := autosdk.NewLoggerProvider(ctx)
 	// TODO: what scope name should we use?
 	// should we allow this to be conbfigurable?
-	// how do we record correct scope name for
-	logger := loggerProvider.Logger("otel/zap")
+	// how do we record correct scope name with zap?
+	logger := loggerProvider.Logger(instrumentationLibraryName)
 
 	return &OtelZapCore{
 		logger: logger,
