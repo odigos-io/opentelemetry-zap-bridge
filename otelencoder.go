@@ -7,7 +7,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-type zapOtelEncoder-test struct {
+type zapOtelEncoder struct {
 	zapcore.Encoder
 
 	OtelAttributes []attribute.KeyValue
