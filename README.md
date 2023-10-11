@@ -8,12 +8,112 @@ This project depends on the experimental [opentelemetry-logs-go](https://github.
 
 ## Target Audience
 
-This project might give you value if you are:
+This project might give you value if you:
 - Maintain or operate golang applications
 - Use zap logger in your golang applications, directly or via a framework
 - Use OpenTelemetry in your system, or plan to use it in the future
 - Looking to simplify your log pipeline by removing log agents from deployments
 - Starting a new project from scratch and looking to tailor a solution to your needs
+
+## Installation
+
+```bash
+go get github.com/keyval-dev/opentelemetry-zap-bridge
+```
+
+## Usage
+
+This package provides a `NewOtelZapCore` function that returns a `zapcore.Core` instance, there is also a wrapper `AttachToZapLogger` that is used to attache to existing zap logger. You can choose to use it in one of the following ways:
+
+### With zap.Logger
+
+If you have a `zap.Logger` instance, which you obtained with `zap.NewProduction()` / `zap.New(...)` etc, you can attach a new `zapcore.Core` to this logger using the `AttachToZapLogger` function:
+
+```go
+import (
+    "go.uber.org/zap"
+	bridge "github.com/keyval-dev/opentelemetry-zap-bridge"
+)
+	logger, _ := zap.NewProduction()
+	logger = bridge.AttachToZapLogger(logger)
+```
+
+### With Kubernetes controller-runtime Package
+
+If you use [`kubebuilder`](https://github.com/kubernetes-sigs/kubebuilder), it autogenerates a `zap.Logger` for you:
+
+```go
+	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
+```
+
+You can convert this code to attach an otel sdk to it like this:
+```go
+import (
+    "sigs.k8s.io/controller-runtime/pkg/log/zap"
+    "github.com/go-logr/zapr"
+	bridge "github.com/keyval-dev/opentelemetry-zap-bridge"
+)
+
+func main() {
+    // ...
+	logger := zap.NewRaw(zap.UseFlagOptions(&opts))
+	logger = bridge.AttachToZapLogger(logger)
+	ctrl.SetLogger(zapr.NewLogger(logger))
+    // ...
+}
+```
+
+### With zap.New
+
+You can  use the `NewOtelZapCore` function to create a new `zapcore.Core` instance and use it with `zap.New` to create just otel logger without console or file logging:
+
+```go
+import (
+    "go.uber.org/zap"
+    bridge "github.com/keyval-dev/opentelemetry-zap-bridge"
+)
+
+func main() {
+    // ...
+    logger, _ := zap.New(bridge.NewOtelZapCore(otelServiceName))
+    // ...
+}
+```
+
+Notice that it is not recommended for development, as you will not see any logs in your console. 
+In production, this might cause no logs to be written to the file, thus making `kubectl logs` useless.
+It will however, make your application more performant, as it will not encode and write to the file.
+
+### With other zapcore.Core
+
+If you are advanced user and you can create your own `zapcore.Core` instance, you can use the `NewOtelZapCore` function to create a new otel sdk `zapcore.Core` instance and use it with `zapcore.NewTee` to combine it with your existing `zapcore.Core` instance:
+
+```go
+import (
+    "go.uber.org/zap/zapcore"
+    bridge "github.com/keyval-dev/opentelemetry-zap-bridge"
+)
+
+func main() {
+    // yourZapCore := ...
+    otelZapLogger := NewOtelZapCore()
+    combinedCore := zapcore.NewTee(core, yourZapCore)
+    logger := zap.New(combinedCore)
+```
+
+## Configuration
+
+Currently the supported configuration method is via OpenTelemetry standard environment variables which you can find [here](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/configuration/sdk-environment-variables.md) and [here for otlp exporter](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md).
+
+Specifically, I found the following environment variables useful:
+- `OTEL_SERVICE_NAME` - to add a service name to the logs records resource, which is must-have for them to be useful.
+- `OTEL_SDK_DISABLED=true` - to disable the OpenTelemetry SDK, which allows a one switch to turn off otel SDK if needed (for example, local development, or as a step in migration)
+- `OTEL_EXPORTER_OTLP_PROTOCOL=grpc` - the default otlp protocol is http, which is less performant than grpc. this is how you can change it.
+- `OTEL_EXPORTER_OTLP_INSECURE=true` - **Only if you use internal OpenTelemetry collector gateway** set when you export your logs over insecure (not TLS) connection. It is recommended to run an OpenTelemetry collector in your cluster to server as a gateway to your log vendor or log backend which your use. This redouces the overhead on the application that do not need to encrypt and export to a local receiver in the cluster.
+- `OTEL_EXPORTER_OTLP_ENDPOINT`/`OTEL_EXPORTER_OTLP_LOGS_ENDPOINT` - the endpoint of the OpenTelemetry collector to which you want to export your logs. recommended: local OpenTelemetry collector gateway in your cluster. You can also use and otlp compatible receiver like you log vendor endpoints.
+- `OTEL_EXPORTER_OTLP_HEADERS` / `OTEL_EXPORTER_OTLP_LOGS_HEADERS` - If you use a vendor, you might get instructions to add some headers to your requests for authentication or other purposes. This is what you need to use for it to work.
+
+The rest of the configuration has reasonable defaults, but you can find browse through them to fine tune to your needs.
 
 ## Motivation
 
@@ -62,96 +162,6 @@ you are creating a `zap.Logger` instance which is a wrapper around `zapcore.Core
 
 This module provides a `zapcore.Core` implementation that initialize an OpenTelemetry logger SDK,
 which is then used to export log records to some destination with an opentelemetry exporter.
-
-## Configuration
-
-Currently the supported configuration method is via OpenTelemetry standard environment variables which you can find [here](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/configuration/sdk-environment-variables.md) and [here for otlp exporter](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md).
-
-Specifically, I found the following environment variables useful:
-- `OTEL_SERVICE_NAME` - to add a service name to the logs records resource, which is must-have for them to be useful.
-- `OTEL_SDK_DISABLED=true` - to disable the OpenTelemetry SDK, which allows a one switch to turn off otel SDK if needed (for example, local development, or as a step in migration)
-- `OTEL_EXPORTER_OTLP_PROTOCOL=grpc` - the default otlp protocol is http, which is less performant than grpc. this is how you can change it.
-- `OTEL_EXPORTER_OTLP_INSECURE=true` - **Only if you use internal OpenTelemetry collector gateway** set when you export your logs over insecure (not TLS) connection. It is recommended to run an OpenTelemetry collector in your cluster to server as a gateway to your log vendor or log backend which your use. This redouces the overhead on the application that do not need to encrypt and export to a local receiver in the cluster.
-- `OTEL_EXPORTER_OTLP_ENDPOINT`/`OTEL_EXPORTER_OTLP_LOGS_ENDPOINT` - the endpoint of the OpenTelemetry collector to which you want to export your logs. recommended: local OpenTelemetry collector gateway in your cluster. You can also use and otlp compatible receiver like you log vendor endpoints.
-- `OTEL_EXPORTER_OTLP_HEADERS` / `OTEL_EXPORTER_OTLP_LOGS_HEADERS` - If you use a vendor, you might get instructions to add some headers to your requests for authentication or other purposes. This is what you need to use for it to work.
-
-The rest of the configuration has reasonable defaults, but you can find browse through them to fine tune to your needs.
-
-## Usage
-
-This package provides a `NewOtelZapCore` function that returns a `zapcore.Core` instance, there is also a wrapper `AttachToZapLogger` that is used to attache to existing zap logger. You can choose to use it in one of the following ways:
-
-### With zap.Logger
-
-If you have a `zap.Logger` instance, which you obtained with `zap.NewProduction()` / `zap.New(...)` etc, you can attach a new `zapcore.Core` to this logger using the `AttachToZapLogger` function:
-
-```go
-	logger, _ := zap.NewProduction()
-	logger = bridge.AttachToZapLogger(logger, otelServiceName)
-```
-
-### With Kubernetes controller-runtime Package
-
-If you use [`kubebuilder`](https://github.com/kubernetes-sigs/kubebuilder), it autogenerates a `zap.Logger` for you:
-
-```go
-	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
-```
-
-You can convert this code to attach an otel sdk to it like this:
-```go
-import (
-    "sigs.k8s.io/controller-runtime/pkg/log/zap"
-    "github.com/go-logr/zapr"
-	bridge "github.com/keyval-dev/opentelemetry-zap-bridge"
-)
-
-func main() {
-    // ...
-	logger := zap.NewRaw(zap.UseFlagOptions(&opts))
-	logger = bridge.AttachToZapLogger(logger)
-	ctrl.SetLogger(zapr.NewLogger(logger))
-    // ...
-}
-```
-
-## With zap.New
-
-You can  use the `NewOtelZapCore` function to create a new `zapcore.Core` instance and use it with `zap.New` to create just otel logger without console or file logging:
-
-```go
-import (
-    "go.uber.org/zap"
-    bridge "github.com/keyval-dev/opentelemetry-zap-bridge"
-)
-
-func main() {
-    // ...
-    logger, _ := zap.New(bridge.NewOtelZapCore(otelServiceName))
-    // ...
-}
-```
-
-Notice that it is not recommended for development, as you will not see any logs in your console. 
-In production, this might cause no logs to be written to the file, thus making `kubectl logs` useless.
-It will however, make your application more performant, as it will not encode and write to the file.
-
-## With other zapcore.Core
-
-If you are advanced user and you can create your own `zapcore.Core` instance, you can use the `NewOtelZapCore` function to create a new otel sdk `zapcore.Core` instance and use it with `zapcore.NewTee` to combine it with your existing `zapcore.Core` instance:
-
-```go
-import (
-    "go.uber.org/zap/zapcore"
-    bridge "github.com/keyval-dev/opentelemetry-zap-bridge"
-)
-
-func main() {
-    // yourZapCore := ...
-    otelZapLogger := NewOtelZapCore()
-    combinedCore := zapcore.NewTee(core, yourZapCore)
-    logger := zap.New(combinedCore)
-```
 
 ## Alternatives
 
