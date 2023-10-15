@@ -48,7 +48,7 @@ func NewOtelZapCore() zapcore.Core {
 func AttachToZapLogger(logger *zap.Logger) *zap.Logger {
 	otelSdlDisabled, defined := os.LookupEnv(otelSdkDisabled)
 	// do not register the otel zap core if user set OTEL_SDK_DISABLED=true
-	if defined && strings.ToLower(otelSdlDisabled) != "true" {
+	if defined && strings.ToLower(otelSdlDisabled) == "true" {
 		return logger
 	}
 
