@@ -13,7 +13,7 @@ import (
 
 const (
 	otelSdkDisabled            = "OTEL_SDK_DISABLED"
-	instrumentationLibraryName = "github.com/keyval-dev/opentelemetry-zap-bridge"
+	instrumentationLibraryName = "github.com/odigos-io/opentelemetry-zap-bridge"
 )
 
 type OtelZapCore struct {

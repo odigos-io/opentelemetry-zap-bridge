@@ -18,7 +18,7 @@ This project might give you value if you:
 ## Installation
 
 ```bash
-go get github.com/keyval-dev/opentelemetry-zap-bridge
+go get github.com/odigos-io/opentelemetry-zap-bridge
 ```
 
 ## Usage
@@ -32,7 +32,7 @@ If you have a `zap.Logger` instance, which you obtained with `zap.NewProduction(
 ```go
 import (
     "go.uber.org/zap"
-	bridge "github.com/keyval-dev/opentelemetry-zap-bridge"
+	bridge "github.com/odigos-io/opentelemetry-zap-bridge"
 )
 	logger, _ := zap.NewProduction()
 	logger = bridge.AttachToZapLogger(logger)
@@ -51,7 +51,7 @@ You can convert this code to attach an otel sdk to it like this:
 import (
     "sigs.k8s.io/controller-runtime/pkg/log/zap"
     "github.com/go-logr/zapr"
-	bridge "github.com/keyval-dev/opentelemetry-zap-bridge"
+	bridge "github.com/odigos-io/opentelemetry-zap-bridge"
 )
 
 func main() {
@@ -70,7 +70,7 @@ You can  use the `NewOtelZapCore` function to create a new `zapcore.Core` instan
 ```go
 import (
     "go.uber.org/zap"
-    bridge "github.com/keyval-dev/opentelemetry-zap-bridge"
+    bridge "github.com/odigos-io/opentelemetry-zap-bridge"
 )
 
 func main() {
@@ -91,7 +91,7 @@ If you are advanced user and you can create your own `zapcore.Core` instance, yo
 ```go
 import (
     "go.uber.org/zap/zapcore"
-    bridge "github.com/keyval-dev/opentelemetry-zap-bridge"
+    bridge "github.com/odigos-io/opentelemetry-zap-bridge"
 )
 
 func main() {
