@@ -22,4 +22,4 @@ jobs:
         with:
           token: ${{ secrets.RELEASE_BOT_TOKEN }}
           release-type: go
-          package-name: github.com/keyval-dev/opentelemetry-zap-bridge
+          package-name: github.com/odigos-io/opentelemetry-zap-bridge
