@@ -44,6 +44,14 @@ func NewOtelZapCore() zapcore.Core {
 	}
 }
 
+// NewCustomOtelZapCore allows for creating zapcore with customized logger,
+// giving thus greater flexibility
+func NewCustomOtelZapCore(logger logs.Logger) zapcore.Core {
+	return &OtelZapCore{
+		logger: logger,
+	}
+}
+
 // TODO: I guess there is more idomatic way to do this in go
 func AttachToZapLogger(logger *zap.Logger) *zap.Logger {
 	otelSdlDisabled, defined := os.LookupEnv(otelSdkDisabled)
