@@ -1,10 +1,12 @@
 # opentelemetry-zap-bridge
 
-This module convert every log record written to zap logger in golang into OpenTelemetry SDK log record and export it directly from the application
+> **Unmaintained.** This package was an experiment and is **no longer maintained**. For Zap and OpenTelemetry logging, use the official bridge instead: [`go.opentelemetry.io/contrib/bridges/otelzap`](https://pkg.go.dev/go.opentelemetry.io/contrib/bridges/otelzap).
 
-## Project Life Cycle
+This module converts every log record written to a Zap logger in Go into an OpenTelemetry SDK log record and exports it directly from the application. The documentation below is kept for reference only.
 
-This project depends on the experimental [opentelemetry-logs-go](https://github.com/agoda-com/opentelemetry-logs-go) project, and is thus experimental as well. It is recommend to use with caution.
+## Project life cycle
+
+This repository is archived as an experiment. It depended on the experimental [opentelemetry-logs-go](https://github.com/agoda-com/opentelemetry-logs-go) project. **Do not adopt it for new code**; migrate existing usage to [otelzap](https://pkg.go.dev/go.opentelemetry.io/contrib/bridges/otelzap).
 
 ## Target Audience
 
