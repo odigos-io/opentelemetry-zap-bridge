@@ -1,3 +1,8 @@
+// Package bridge sends Zap log records to OpenTelemetry.
+//
+// Deprecated: This module was an experiment and is no longer maintained.
+// Use go.opentelemetry.io/contrib/bridges/otelzap instead
+// (https://pkg.go.dev/go.opentelemetry.io/contrib/bridges/otelzap).
 package bridge
 
 import (
